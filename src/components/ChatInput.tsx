@@ -1,38 +1,39 @@
-import React, { useState } from 'react'
+import { useState } from 'react';
+// 1. Fixed verbatimModuleSyntax by using 'import type'
+// 2. Switched from FormEvent to the accurate, modern FormEvent type interface
+import type { FormEvent } from 'react';
 
-interface ChatInputProps{
-    onSendMessage: (text: string) => void;
-
+interface ChatInputProps {
+  onSendMessage: (text: string) => void;
 }
 
-const ChatInput = ({onSendMessage}: ChatInputProps) => {
-    const [input, setInput] = useState('');
-    const handleSubmit = (e: React.FormEvent) =>{
-        e.preventDefault();
-        if(!input.trim()) return;
-        onSendMessage(input);
-        setInput('');
+export default function ChatInput({ onSendMessage }: ChatInputProps) {
+  const [text, setText] = useState('');
 
-    }
+  // Explicitly typing the submission element ensures compatibility across modern React engines
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    onSendMessage(text);
+    setText('');
+  };
+
   return (
-    <div>
-      <form onSubmit={handleSubmit} className='border-t bodder-slate-200 bg-white p-4' >
-        <div className='flex gap-4 max-w-4xl mx-auto'>
-<input 
-type='text'
-value={input}
-onChange={(e) => setInput(e.target.value)}
-placeholder='type your message..'
-className='flex-1 px-4 py-2 border broder-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500'
-/>
-       
-<p><button type='submit' className='bg-slate-900 hover:bg-slate-800 text-white px-6 py-2 rounded-lg font-medium transition-colors'>
-    Send
-    </button></p>
-     </div>
-      </form>
-    </div>
-  )
+    <form onSubmit={handleSubmit} className="flex items-center space-x-2 w-full">
+      <input
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Ask regarding global disease alerts..."
+        className="flex-1 bg-slate-900 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-4 py-3 border border-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-150"
+      />
+      <button
+        type="submit"
+        disabled={!text.trim()}
+        className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-medium text-sm px-5 py-3 rounded-xl shadow-lg transition-all duration-150 flex items-center justify-center space-x-1"
+      >
+        <span>Send</span>
+      </button>
+    </form>
+  );
 }
-
-export default ChatInput
