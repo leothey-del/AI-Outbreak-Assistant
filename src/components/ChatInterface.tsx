@@ -7,11 +7,10 @@ import { getFilteredLocationsFromText } from '../utils/filterLocations';
 
 interface ChatInterfaceProps {
   onFilterLocations: (pins: any[]) => void;
-  activeTab?: 'chat' | 'map';
-  setActiveTab?: (tab: 'chat' | 'map') => void;
+ 
 }
 
-export const ChatInterface = ({ onFilterLocations, activeTab, setActiveTab }: ChatInterfaceProps) => {
+export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isBotTyping, setIsBotTyping] = useState<boolean>(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);

@@ -42,8 +42,7 @@ function App() {
       }`}>
         <ChatInterface 
           onFilterLocations={setPinsToShow} 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
+       
         />
       </div>
 
