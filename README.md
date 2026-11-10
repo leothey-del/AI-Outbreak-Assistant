@@ -1,73 +1,72 @@
-# React + TypeScript + Vite
+# AI Outbreak Assistant
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive public-health assistant for exploring infectious-disease outbreak information. Ask questions about diseases such as dengue, rabies, COVID-19, malaria, and Zika, and view location-tagged responses alongside an interactive map.
 
-Currently, two official plugins are available:
+**Live app:** [ai-outbreak-assistant.vercel.app](https://ai-outbreak-assistant.vercel.app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+> **Important:** This project is for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Outbreak information may be incomplete or out of date; consult local public-health authorities and qualified healthcare professionals for current guidance.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- AI-powered outbreak and public-health Q&A using Google Gemini.
+- Interactive disease map powered by Mapbox.
+- Location tags in assistant responses to connect mentioned places with the map.
+- Responsive chat and map views for desktop and mobile.
 
-## Expanding the ESLint configuration
+## Tech stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19 and TypeScript
+- Vite
+- Google Gemini API (`@google/genai`)
+- Mapbox GL and `react-map-gl`
+- Tailwind CSS
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js and npm
+- A Google Gemini API key
+- A Mapbox access token
+
+### Install and run
+
+```bash
+git clone https://github.com/leothey-del/AI-Outbreak-Assistant.git
+cd AI-Outbreak-Assistant
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Create a `.env` file in the project root and add your API credentials:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```dotenv
+VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
+VITE_GEMINI_API_KEY=your_gemini_key_here
 ```
+
+Start the local development server:
+
+```bash
+npm run dev
+```
+
+Vite will print the local URL in your terminal.
+
+## Available scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server. |
+| `npm run build` | Type-check and build the production app. |
+| `npm run preview` | Preview the production build locally. |
+| `npm run lint` | Run ESLint. |
+
+## Configuration and data notes
+
+The app uses the Gemini API for assistant responses and Mapbox for the map. Keep API keys private and do not commit your `.env` file. The repository includes `.env.example` as a template.
+
+The map currently includes sample incident entries in `src/data/mapLocation.ts`; do not treat these as verified or real-time surveillance data. Check authoritative public-health sources for current outbreak reports.
+
+## License
+
+No license is currently specified for this repository.
