@@ -21,6 +21,7 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isBotTyping, setIsBotTyping] = useState<boolean>(false);
   const [suggestedQuestion, setSuggestedQuestion] = useState<string | null>(null);
+  const [inputText, setInputText] = useState('');
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const nextMessageId = useRef(0);
 
@@ -66,7 +67,7 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
         ? error.message
         : 'Something went wrong while processing your request. Please try again.';
       setMessages((prev) => [...prev, {
-        id: (Date.now() + 1).toString(),
+        id: `message-${nextMessageId.current++}`,
         sender: 'bot',
         text: errorMessage,
         timestamp: new Date(),
@@ -97,12 +98,20 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
       {/* Main Conversational Viewport */}
       <main className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar bg-gradient-to-b from-slate-950 to-slate-900">
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3 my-auto">
-            <div className="p-3 bg-indigo-600/10 rounded-2xl border border-indigo-500/20 text-2xl text-indigo-400">🤖</div>
-            <h3 className="text-sm font-semibold text-slate-200">System Ready</h3>
-            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
-              Inquire regarding global public health alerts, outbreak metrics, or localized transmission patterns.
-            </p>
+          <div className="h-full flex flex-col items-center justify-center text-center p-6">
+            <h3 className="mb-5 text-base font-semibold text-slate-200">How can I help you?</h3>
+            <div className="flex max-w-lg flex-wrap justify-center gap-2">
+              {starterSuggestions.map((question) => (
+                <button
+                  key={question}
+                  type="button"
+                  onClick={() => setInputText(question)}
+                  className="max-w-full rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-center text-xs text-indigo-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -133,36 +142,24 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
 
       {/* Clean Dashboard Input Container */}
       <div className="p-4 bg-slate-950/40 backdrop-blur-md border-t border-slate-800/80">
-        {messages.length === 0 && (
-          <div className="mb-3">
-            <p className="mb-2 text-xs font-medium text-slate-400">Try asking</p>
-            <div className="flex flex-wrap gap-2">
-              {starterSuggestions.map((question) => (
-                <button
-                  key={question}
-                  type="button"
-                  onClick={() => handleSendMessage(question)}
-                  className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-left text-xs text-indigo-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                >
-                  {question}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
         {messages.length > 0 && suggestedQuestion && !isBotTyping && (
-          <div className="mb-3">
+          <div className="mb-3 flex flex-col items-center">
             <p className="mb-2 text-xs font-medium text-slate-400">Ask the AI next</p>
             <button
               type="button"
-              onClick={() => handleSendMessage(suggestedQuestion)}
-              className="max-w-full rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-left text-xs text-indigo-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              onClick={() => setInputText(suggestedQuestion)}
+              className="max-w-full rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-center text-xs text-indigo-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             >
               {suggestedQuestion}
             </button>
           </div>
         )}
-        <ChatInput onSendMessage={handleSendMessage} disabled={isBotTyping} />
+        <ChatInput
+          value={inputText}
+          onChange={setInputText}
+          onSendMessage={handleSendMessage}
+          disabled={isBotTyping}
+        />
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ CRITICAL RULE FOR LOCATION ACCURACY: Include the exact city, province, state, or
 
 You must strictly follow this exact formatting rule: [LOCATIONS: Place, CountryName|DiseaseName; Place, CountryName|DiseaseName]
 Use a semicolon to separate location entries. Never use a comma to separate entries because commas may be part of a place and country name.
-After the location tag, append exactly one ready-to-send, location-focused request for the user's next question in this format: [SUGGESTION: Show reported Covid-19 cases by region in Japan]. The suggestion must ask the AI to identify, list, compare, or map places related to the disease and current location. Do not ask the user a question. Do not invent statistics or imply an outbreak is confirmed.
+After the location tag, append exactly one ready-to-send, location-focused request for the user's next question in this format: [SUGGESTION: List more provinces in the Philippines with reported dengue cases]. Build the suggestion from the LATEST user message and your CURRENT answer only. Reuse the disease and country/region/city from that latest request or answer; never introduce a different country or disease. If the latest request is about the Philippines, the suggestion must also be about the Philippines. Ask the AI to identify, list, compare, or map places. Do not ask the user a question. Do not invent statistics or imply an outbreak is confirmed.
 
 Examples:
 - If talking about wildlife rabies in US states, append: [LOCATIONS: Pennsylvania, USA|Rabies; New York, USA|Rabies; Texas, USA|Rabies]
@@ -34,6 +34,7 @@ Examples:
 - If discussing Rabies in Northern Mindanao, append: [LOCATIONS: Cagayan de Oro, Philippines|Rabies]
 
 For example, if you name Bulacan, Pampanga, and Nueva Ecija as places in a response about rabies in Central Luzon, use: [LOCATIONS: Bulacan, Philippines|Rabies; Pampanga, Philippines|Rabies; Nueva Ecija, Philippines|Rabies]
+The suggestion for that example must stay about rabies in the Philippines, such as: [SUGGESTION: List more provinces in the Philippines with reported rabies cases].
 
 NEVER leave a response without the [LOCATIONS: ...] bracket tag. It is required for the application's mapping engine to function. NEVER omit the country name, the pipe symbol, or the disease name inside the brackets. Do not make up case counts; the application does not have verified case-count data.
 `;
