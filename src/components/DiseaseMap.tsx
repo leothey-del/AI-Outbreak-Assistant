@@ -23,7 +23,7 @@ export const DiseaseMap = ({ pinsToShow, activeTab }: DiseaseMapProps) => {
     try {
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/streets-v12', // High-end dark baseline map
+        style: 'mapbox://styles/mapbox/satellite-streets-v12',
         center: [12.0, 20.0], // Default coordinates (Centered globally to look clean)
         zoom: 1.8, // Default overview zoom depth
         pitch: 0,
@@ -89,7 +89,7 @@ export const DiseaseMap = ({ pinsToShow, activeTab }: DiseaseMapProps) => {
         <div style="color: #1e293b; font-family: sans-serif; padding: 4px;">
           <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700;">${pin.locationName}</h4>
           <p style="margin: 0 0 2px 0; font-size: 11px; color: #ef4444; font-weight: 600;">⚠️ ${pin.diseaseType}</p>
-          <p style="margin: 0; font-size: 11px; color: #64748b;">Est. Cases: <strong>${pin.caseCount}</strong></p>
+          ${pin.caseCount === undefined ? '' : `<p style="margin: 0; font-size: 11px; color: #64748b;">Cases: <strong>${pin.caseCount}</strong></p>`}
         </div>
       `);
 

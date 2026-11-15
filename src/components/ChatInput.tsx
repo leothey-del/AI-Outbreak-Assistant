@@ -5,9 +5,10 @@ import type { FormEvent } from 'react';
 
 interface ChatInputProps {
   onSendMessage: (text: string) => void;
+  disabled?: boolean;
 }
 
-export default function ChatInput({ onSendMessage }: ChatInputProps) {
+export default function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
   const [text, setText] = useState('');
 
   // Explicitly typing the submission element ensures compatibility across modern React engines
@@ -23,13 +24,14 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
       <input
         type="text"
         value={text}
+        disabled={disabled}
         onChange={(e) => setText(e.target.value)}
         placeholder="Ask regarding global disease alerts..."
-        className="flex-1 bg-slate-900 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-4 py-3 border border-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-150"
+        className="flex-1 bg-slate-900 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-4 py-3 border border-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60"
       />
       <button
         type="submit"
-        disabled={!text.trim()}
+        disabled={disabled || !text.trim()}
         className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-medium text-sm px-5 py-3 rounded-xl shadow-lg transition-all duration-150 flex items-center justify-center space-x-1"
       >
         <span>Send</span>

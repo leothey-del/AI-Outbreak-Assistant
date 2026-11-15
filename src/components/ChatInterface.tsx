@@ -2,57 +2,78 @@ import { useState, useEffect, useRef } from 'react';
 import ChatInput from './ChatInput';
 import MessageBubbleProps from './MessageBubbleProps';
 import type { Message } from '../types'; 
-import { askGemini } from '../services/gemini'; 
+import { askGemini, GeminiRequestError } from '../services/gemini';
 import { getFilteredLocationsFromText } from '../utils/filterLocations';
+import type { MapIncident } from '../data/mapLocation';
+
+const starterSuggestions = [
+  'Which cities in the Philippines have reported rabies cases?',
+  'Which regions in Japan have reported COVID-19 cases?',
+  'Which provinces in the Philippines have reported dengue cases?',
+];
 
 interface ChatInterfaceProps {
-  onFilterLocations: (pins: any[]) => void;
+  onFilterLocations: (pins: MapIncident[]) => void;
  
 }
 
 export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isBotTyping, setIsBotTyping] = useState<boolean>(false);
+  const [suggestedQuestion, setSuggestedQuestion] = useState<string | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (messages.length === 0) return;
-    const lastMessage = messages[messages.length - 1];
-
-    if (lastMessage.sender === 'user') {
-      setIsBotTyping(true);
-      const fetchBotResponse = async () => {
-        const aiResponseText = await askGemini(messages); 
-
-        const filteredPins = await getFilteredLocationsFromText(aiResponseText);
-        onFilterLocations(filteredPins);
-
-        const geminiReply: Message = {
-          id: (Date.now() + 1).toString(),
-          sender: 'bot',
-          text: aiResponseText,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, geminiReply]);
-        setIsBotTyping(false);
-      };
-      fetchBotResponse();
-    }
-  }, [messages, onFilterLocations]);
+  const nextMessageId = useRef(0);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isBotTyping]);
 
-  const handleSendMessage = (text: string) => {
-    onFilterLocations([]); // Wipe old pins instantly on fresh query
+  const handleSendMessage = async (text: string) => {
+    const trimmedText = text.trim();
+    if (!trimmedText || isBotTyping) return;
+
+    onFilterLocations([]);
+    setSuggestedQuestion(null);
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `message-${nextMessageId.current++}`,
       sender: 'user',
-      text: text,
+      text: trimmedText,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMessage]);
+    setIsBotTyping(true);
+
+    try {
+      const history = [...messages, userMessage];
+      const aiResponseText = await askGemini(history);
+      const suggestionMatch = aiResponseText.match(/\[SUGGESTION:\s*(.*?)\]/i);
+      const nextSuggestion = suggestionMatch?.[1]?.trim() || null;
+      setSuggestedQuestion(nextSuggestion);
+
+      const geminiReply: Message = {
+        id: `message-${nextMessageId.current++}`,
+        sender: 'bot',
+        text: aiResponseText,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, geminiReply]);
+
+      const filteredPins = await getFilteredLocationsFromText(aiResponseText);
+      onFilterLocations(filteredPins);
+    } catch (error: unknown) {
+      console.error('Failed to process the chat response:', error);
+      const errorMessage = error instanceof GeminiRequestError
+        ? error.message
+        : 'Something went wrong while processing your request. Please try again.';
+      setMessages((prev) => [...prev, {
+        id: (Date.now() + 1).toString(),
+        sender: 'bot',
+        text: errorMessage,
+        timestamp: new Date(),
+      }]);
+    } finally {
+      setIsBotTyping(false);
+    }
   };
 
   return (
@@ -86,7 +107,10 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
         )}
 
         {messages.map((msg) => {
-          const cleanText = msg.text.replace(/\[LOCATIONS:\s*.*?\]/, '').trim();
+          const cleanText = msg.text
+            .replace(/\[LOCATIONS:\s*.*?\]/i, '')
+            .replace(/\[SUGGESTION:\s*.*?\]/i, '')
+            .trim();
           const messageToRender = { ...msg, text: cleanText };
 
           return (
@@ -109,7 +133,36 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
 
       {/* Clean Dashboard Input Container */}
       <div className="p-4 bg-slate-950/40 backdrop-blur-md border-t border-slate-800/80">
-        <ChatInput onSendMessage={handleSendMessage} />
+        {messages.length === 0 && (
+          <div className="mb-3">
+            <p className="mb-2 text-xs font-medium text-slate-400">Try asking</p>
+            <div className="flex flex-wrap gap-2">
+              {starterSuggestions.map((question) => (
+                <button
+                  key={question}
+                  type="button"
+                  onClick={() => handleSendMessage(question)}
+                  className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-left text-xs text-indigo-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {messages.length > 0 && suggestedQuestion && !isBotTyping && (
+          <div className="mb-3">
+            <p className="mb-2 text-xs font-medium text-slate-400">Ask the AI next</p>
+            <button
+              type="button"
+              onClick={() => handleSendMessage(suggestedQuestion)}
+              className="max-w-full rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-left text-xs text-indigo-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            >
+              {suggestedQuestion}
+            </button>
+          </div>
+        )}
+        <ChatInput onSendMessage={handleSendMessage} disabled={isBotTyping} />
       </div>
     </div>
   );

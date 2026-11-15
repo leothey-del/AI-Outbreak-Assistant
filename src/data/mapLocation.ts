@@ -3,7 +3,7 @@ export interface MapIncident{
     locationName: string;
     longitude: number;
     latitude: number;
-     caseCount: number;
+     caseCount?: number;
      diseaseType: string;
 }
 

@@ -17,22 +17,78 @@ CRITICAL GUARDRAILS:
 5. ABSOLUTE MANDATORY FORMAT RULE: Every single time you answer a user's question, you MUST append a bracketed location tag at the absolute end of your response. 
 
 CRITICAL GEO-ACCURACY RULE: You MUST always include the explicit Country Name next to the city or state inside the bracketed tag so the map engine can pinpoint it accurately. Never output a city name by itself.
-Format: LocationName, CountryName
+Each location entry must include the country: LocationName, CountryName|DiseaseName
 
 CRITICAL HISTORY RULE: You must ONLY include locations in the [LOCATIONS:] tag that are explicitly discussed in your CURRENT response turn. Do not carry over, re-list, duplicate, or append locations from previous user questions or assistant responses hidden back in the conversation logs.
 
-CRITICAL RULE FOR BROAD REGIONS: If you mention a massive regional area (like Northern Mindanao, Africa, or Central America), you MUST output a major capital city or exact specific country of that region inside the [LOCATIONS:] tag so the map geocoder can pinpoint it accurately. Do not pass broad region names inside the brackets.
+CRITICAL RULE FOR LOCATION ACCURACY: Include the exact city, province, state, or other specific place you actually name in your response. Do not replace it with a nearby city, a capital, or a broader region. If you discuss a broad region but name specific provinces or cities within it, tag those exact provinces or cities. Do not invent locations or claim a place has an outbreak unless your response says so.
 
-You must strictly follow this exact formatting rule: [LOCATIONS: CityOrState, CountryName|DiseaseName]
+You must strictly follow this exact formatting rule: [LOCATIONS: Place, CountryName|DiseaseName; Place, CountryName|DiseaseName]
+Use a semicolon to separate location entries. Never use a comma to separate entries because commas may be part of a place and country name.
+After the location tag, append exactly one ready-to-send, location-focused request for the user's next question in this format: [SUGGESTION: Show reported Covid-19 cases by region in Japan]. The suggestion must ask the AI to identify, list, compare, or map places related to the disease and current location. Do not ask the user a question. Do not invent statistics or imply an outbreak is confirmed.
 
 Examples:
-- If talking about wildlife rabies in US states, append: [LOCATIONS: Pennsylvania, USA|Rabies, New York, USA|Rabies, Texas, USA|Rabies]
+- If talking about wildlife rabies in US states, append: [LOCATIONS: Pennsylvania, USA|Rabies; New York, USA|Rabies; Texas, USA|Rabies]
 - If discussing Dengue in Brazil, append: [LOCATIONS: Rio de Janeiro, Brazil|Dengue]
-- If discussing Malaria in Kenya and Covid in Tokyo, append: [LOCATIONS: Kenya|Malaria, Tokyo, Japan|Covid]
+- If discussing Malaria in Kenya and Covid in Tokyo, append: [LOCATIONS: Kenya|Malaria; Tokyo, Japan|Covid]
 - If discussing Rabies in Northern Mindanao, append: [LOCATIONS: Cagayan de Oro, Philippines|Rabies]
 
-NEVER leave a response without the [LOCATIONS: ...] bracket tag at the end. It is required for the application's mapping engine to function. NEVER omit the country name, the pipe symbol, or the disease name inside the brackets.
+For example, if you name Bulacan, Pampanga, and Nueva Ecija as places in a response about rabies in Central Luzon, use: [LOCATIONS: Bulacan, Philippines|Rabies; Pampanga, Philippines|Rabies; Nueva Ecija, Philippines|Rabies]
+
+NEVER leave a response without the [LOCATIONS: ...] bracket tag. It is required for the application's mapping engine to function. NEVER omit the country name, the pipe symbol, or the disease name inside the brackets. Do not make up case counts; the application does not have verified case-count data.
 `;
+
+export class GeminiRequestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'GeminiRequestError';
+  }
+}
+
+const getApiErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return '';
+};
+
+const getApiErrorStatus = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null || !('status' in error)) return undefined;
+  const { status } = error;
+  if (typeof status === 'number') return status;
+  if (typeof status === 'string' && /^\d{3}$/.test(status)) return Number(status);
+  return undefined;
+};
+
+const toGeminiRequestError = (error: unknown): GeminiRequestError => {
+  const message = getApiErrorMessage(error);
+  const status = getApiErrorStatus(error);
+  const retryMatch = message.match(/retry in\s+([\d.]+)\s*(?:s|sec|seconds)\b/i);
+  const retryHint = retryMatch
+    ? ` Try again in about ${Math.ceil(Number(retryMatch[1]))} seconds.`
+    : '';
+
+  if (status === 429 || /RESOURCE_EXHAUSTED|rate.?limit|quota/i.test(message)) {
+    return new GeminiRequestError(
+      `The Gemini API usage limit for this project has been reached.${retryHint} Please wait and try again, or check your active limits in Google AI Studio: https://aistudio.google.com/rate-limit`
+    );
+  }
+
+  if (status === 401 || status === 403) {
+    return new GeminiRequestError(
+      'The Gemini API key is invalid or does not have access to this model. Please check the API key and project settings.'
+    );
+  }
+
+  if (status === 402 || /billing|payment required|prepay/i.test(message)) {
+    return new GeminiRequestError(
+      'The Gemini API project needs billing or available credits before it can answer. Please check the project billing and usage in Google AI Studio.'
+    );
+  }
+
+  return new GeminiRequestError(
+    'Could not connect to the Gemini API. Please check your internet connection and try again.'
+  );
+};
 
 export const askGemini = async (history: Message[]): Promise<string> => {
   try {
@@ -51,9 +107,14 @@ export const askGemini = async (history: Message[]): Promise<string> => {
       }
     });
 
-    return response.text || "Empty server string generated.";
-  } catch (error: any) {
-    console.error("Stream disrupted:", error);
-    return "Connection Interrupted. Please check your network.";
+    if (!response.text) {
+      throw new GeminiRequestError('The Gemini API returned an empty response. Please try again.');
+    }
+
+    return response.text;
+  } catch (error: unknown) {
+    if (error instanceof GeminiRequestError) throw error;
+    console.error('Gemini request failed:', error);
+    throw toGeminiRequestError(error);
   }
 };
