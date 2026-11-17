@@ -60,9 +60,6 @@ const MessageBubbleProps = ({ message }: MessageBubbleProps) => {
             setIsCopyDialogOpen(true);
           } : undefined}
         >
-          {isUser && (
-            <div className="mb-1 text-xs font-medium text-slate-400">You</div>
-          )}
           <p className="select-text whitespace-pre-wrap text-[15px] font-normal leading-7">{message.text}</p>
         </div>
       </div>

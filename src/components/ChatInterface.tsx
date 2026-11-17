@@ -53,8 +53,9 @@ export const ChatInterface = ({
   const [isSuggestionExpanded, setIsSuggestionExpanded] = useState(false);
   const [inputText, setInputText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLElement>(null);
   const nextMessageId = useRef(0);
+  const previousConversationIdRef = useRef(activeConversationId);
   const activeConversation = conversations.find(({ id }) => id === activeConversationId);
   const messages = activeConversation?.messages ?? EMPTY_MESSAGES;
   const lastBotMessage = [...messages].reverse().find(({ sender }) => sender === 'bot');
@@ -99,8 +100,25 @@ export const ChatInterface = ({
   };
 
   useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isWaitingForReply]);
+    const scrollContainer = chatScrollRef.current;
+    if (!scrollContainer) return;
+
+    const conversationChanged = previousConversationIdRef.current !== activeConversationId;
+    const isNearBottom = scrollContainer.scrollHeight
+      - scrollContainer.scrollTop
+      - scrollContainer.clientHeight < 100;
+
+    previousConversationIdRef.current = activeConversationId;
+
+    if (conversationChanged) {
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    } else if (isNearBottom) {
+      scrollContainer.scrollTo({
+        top: scrollContainer.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [activeConversationId, messages, isWaitingForReply]);
 
   const handleSendMessage = async (text: string) => {
     const trimmedText = text.trim();
@@ -230,7 +248,7 @@ export const ChatInterface = ({
           </>
         )}
       </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="chat-desktop-header z-10 hidden items-center justify-between border-b border-slate-800/80 bg-slate-950/60 px-5 py-4 backdrop-blur-md md:flex">
         <div className="flex min-w-0 items-center gap-3">
           {!isHistoryOpen && (
@@ -284,7 +302,7 @@ export const ChatInterface = ({
           {storageError}
         </p>
       )}
-      <main className="relative min-h-0 flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-slate-950 to-slate-900 p-5 custom-scrollbar">
+      <main ref={chatScrollRef} className="relative min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-y-contain touch-pan-y bg-gradient-to-b from-slate-950 to-slate-900 p-5 custom-scrollbar">
         {messages.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
             <h3 className="mb-5 text-base font-semibold text-slate-200">How can I help you?</h3>
@@ -334,11 +352,10 @@ export const ChatInterface = ({
             </div>
           </div>
         )}
-        <div ref={chatBottomRef} />
       </main>
 
       {/* Clean Dashboard Input Container */}
-      <div className="shrink-0 p-4">
+      <div className="shrink-0 bg-slate-900 p-4">
         {messages.length > 0 && suggestedQuestion && !isBotTyping && (
           <div className="mb-2 flex items-center justify-start gap-1">
             <svg

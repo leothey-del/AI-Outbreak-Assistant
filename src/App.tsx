@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DiseaseMap } from './components/DiseaseMap';
 import { ChatInterface } from './components/ChatInterface';
 import { type MapIncident } from './data/mapLocation';
@@ -8,15 +8,42 @@ import { type MapIncident } from './data/mapLocation';
 // 🛠️ Open src/App.tsx and look at the main wrapper div at the top:
 
 function App() {
+  const [visualViewportBounds, setVisualViewportBounds] = useState<{ height: number; top: number } | null>(null);
   const [pinsToShow, setPinsToShow] = useState<MapIncident[]>([]);
   const [activeTab, setActiveTab] = useState<'chat' | 'map'>('chat');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [chatSessionKey, setChatSessionKey] = useState(0);
   const hasMapResults = pinsToShow.length > 0;
 
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const updateViewportBounds = () => {
+      setVisualViewportBounds({
+        height: viewport.height,
+        top: viewport.offsetTop,
+      });
+    };
+
+    updateViewportBounds();
+    viewport.addEventListener('resize', updateViewportBounds);
+    viewport.addEventListener('scroll', updateViewportBounds);
+
+    return () => {
+      viewport.removeEventListener('resize', updateViewportBounds);
+      viewport.removeEventListener('scroll', updateViewportBounds);
+    };
+  }, []);
+
   /* Change h-screen to h-[100dvh] and adjust the positioning rules */
   return (
-    <div className="fixed top-0 left-0 w-full h-[100dvh] flex flex-col md:flex-row overflow-hidden bg-slate-950 text-slate-100 font-sans antialiased select-none">
+    <div
+      className="fixed left-0 w-full flex flex-col overflow-hidden bg-slate-950 text-slate-100 font-sans antialiased select-none md:flex-row"
+      style={visualViewportBounds
+        ? { top: `${visualViewportBounds.top}px`, height: `${visualViewportBounds.height}px` }
+        : { top: 0, height: '100dvh' }}
+    >
       
       {/* 📱 MOBILE NAVIGATION BAR */}
       <div className="z-50 flex h-14 w-full shrink-0 items-center gap-2 border-b border-slate-800/80 bg-slate-950 px-2 md:hidden">
