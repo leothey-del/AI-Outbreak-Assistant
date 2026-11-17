@@ -11,8 +11,8 @@ function App() {
   const [pinsToShow, setPinsToShow] = useState<MapIncident[]>([]);
   const [activeTab, setActiveTab] = useState<'chat' | 'map'>('chat');
 
+  /* Change h-screen to h-[100dvh] and adjust the positioning rules */
   return (
-    /* Change h-screen to h-[100dvh] and adjust the positioning rules */
     <div className="fixed top-0 left-0 w-full h-[100dvh] flex flex-col md:flex-row overflow-hidden bg-slate-950 text-slate-100 font-sans antialiased select-none">
       
       {/* 📱 MOBILE NAVIGATION BAR */}
