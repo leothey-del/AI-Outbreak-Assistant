@@ -6,12 +6,11 @@ interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSendMessage: (text: string) => void;
-  onFocusChange: (focused: boolean) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   disabled?: boolean;
 }
 
-export default function ChatInput({ value, onChange, onSendMessage, onFocusChange, inputRef, disabled = false }: ChatInputProps) {
+export default function ChatInput({ value, onChange, onSendMessage, inputRef, disabled = false }: ChatInputProps) {
   // Explicitly typing the submission element ensures compatibility across modern React engines
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,8 +26,6 @@ export default function ChatInput({ value, onChange, onSendMessage, onFocusChang
         ref={inputRef}
         value={value}
         disabled={disabled}
-        onFocus={() => onFocusChange(true)}
-        onBlur={() => onFocusChange(false)}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Ask regarding global disease alerts..."
         className="w-full bg-transparent text-slate-100 placeholder-slate-500 text-sm rounded-xl py-3 pl-4 pr-14 border border-slate-700/80 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60"

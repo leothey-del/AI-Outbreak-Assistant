@@ -99,6 +99,25 @@ export const DiseaseMap = ({ pinsToShow, activeTab }: DiseaseMapProps) => {
     };
   }, []);
 
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    const map = mapRef.current;
+    if (!container || !map) return;
+
+    let resizeFrame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => map.resize());
+    });
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(resizeFrame);
+    };
+  }, []);
+
   // 2. THE HALF-MAP GLITCH FIX: Handle mobile tab resizing triggers safely
   useEffect(() => {
     if (mapRef.current) {
@@ -234,7 +253,7 @@ export const DiseaseMap = ({ pinsToShow, activeTab }: DiseaseMapProps) => {
   }, [pinsToShow]);
 
   return (
-    <div className="w-full h-full relative flex-1">
+    <div className="relative h-full min-w-0 w-full flex-1">
       <div ref={mapContainerRef} className="absolute inset-0 w-full h-full" />
     </div>
   );
