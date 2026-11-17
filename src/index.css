@@ -14,3 +14,107 @@ html {
 body {
   background-color: #020617;
 }
+
+.map-location-zoom {
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.map-location-zoom:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.map-location-zoom:focus-visible,
+.map-history-back:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.map-history-control {
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 10px;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.mapboxgl-map .mapboxgl-ctrl.map-history-control button.map-history-back {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 10px;
+  background: rgb(15 23 42 / 92%);
+  color: #f8fafc;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 35%);
+  cursor: pointer;
+  transition: background-color 150ms ease, opacity 150ms ease, transform 150ms ease;
+}
+
+.mapboxgl-map .mapboxgl-ctrl.map-history-control button.map-history-back:hover {
+  background-color: #334155 !important;
+  color: #fff !important;
+}
+
+.mapboxgl-map .mapboxgl-ctrl.map-history-control button.map-history-back:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.mapboxgl-map .mapboxgl-ctrl.map-history-control button.map-history-back:disabled {
+  background-color: rgb(15 23 42 / 92%) !important;
+  color: #cbd5e1;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.mapboxgl-map .mapboxgl-ctrl.map-history-control button.map-history-back:disabled:hover {
+  background-color: #1e293b !important;
+  color: #f8fafc;
+}
+
+.skeleton-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    rgb(30 41 59 / 65%) 0%,
+    rgb(71 85 105 / 55%) 50%,
+    rgb(30 41 59 / 65%) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+.message-appear {
+  animation: message-appear 360ms ease-out both;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer,
+  .message-appear {
+    animation: none;
+  }
+}

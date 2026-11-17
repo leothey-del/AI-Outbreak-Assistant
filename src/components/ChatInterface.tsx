@@ -20,6 +20,7 @@ interface ChatInterfaceProps {
 export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isBotTyping, setIsBotTyping] = useState<boolean>(false);
+  const [isWaitingForReply, setIsWaitingForReply] = useState(false);
   const [hasInteractedWithInput, setHasInteractedWithInput] = useState(false);
   const [suggestedQuestion, setSuggestedQuestion] = useState<string | null>(null);
   const [isSuggestionExpanded, setIsSuggestionExpanded] = useState(false);
@@ -35,7 +36,7 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isBotTyping]);
+  }, [messages, isWaitingForReply]);
 
   const handleSendMessage = async (text: string) => {
     const trimmedText = text.trim();
@@ -52,10 +53,12 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
     };
     setMessages((prev) => [...prev, userMessage]);
     setIsBotTyping(true);
+    setIsWaitingForReply(true);
 
     try {
       const history = [...messages, userMessage];
       const aiResponseText = await askGemini(history);
+      setIsWaitingForReply(false);
       const suggestionMatch = aiResponseText.match(/\[SUGGESTION:\s*(.*?)\]/i);
       const nextSuggestion = suggestionMatch?.[1]?.trim() || null;
       setSuggestedQuestion(nextSuggestion);
@@ -72,6 +75,7 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
       const filteredPins = await getFilteredLocationsFromText(aiResponseText);
       onFilterLocations(filteredPins);
     } catch (error: unknown) {
+      setIsWaitingForReply(false);
       console.error('Failed to process the chat response:', error);
       const errorMessage = error instanceof GeminiRequestError
         ? error.message
@@ -140,13 +144,33 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
           );
         })}
         
-        {/* Enterprise Loading Skeleton */}
-        {isBotTyping && (
-          <div className="flex items-start space-x-3 max-w-[85%] animate-pulse">
-            <div className="h-7 w-7 rounded-lg bg-slate-800 flex-shrink-0" />
-            <div className="space-y-2 w-full">
-              <div className="h-3 bg-slate-800 rounded w-1/3" />
-              <div className="h-16 bg-slate-800/60 rounded-xl w-full border border-slate-800" />
+        {/* Assistant response skeleton */}
+        {isWaitingForReply && (
+          <div role="status" className="flex w-full items-start gap-3 py-2">
+            <span className="sr-only">Assistant is composing a response.</span>
+            <div aria-hidden="true" className="flex min-w-0 flex-1 items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-indigo-400/20 bg-indigo-500/10 text-indigo-300">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3Z"
+                    stroke="currentColor"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                  />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1 pt-0.5">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-[11px] font-semibold tracking-wide text-slate-300">AI Assistant</span>
+                  <span className="h-1 w-1 rounded-full bg-indigo-400 motion-safe:animate-pulse" />
+                  <span className="text-[11px] text-slate-500">Composing response</span>
+                </div>
+                <div className="space-y-2.5">
+                  <div className="skeleton-shimmer h-3 w-[92%] rounded-full" />
+                  <div className="skeleton-shimmer h-3 w-full rounded-full" />
+                  <div className="skeleton-shimmer h-3 w-3/5 rounded-full" />
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -47,7 +47,9 @@ const MessageBubbleProps = ({ message }: MessageBubbleProps) => {
 
   return (
     <>
-      <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} py-2`}>
+      <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} py-2 ${
+        isUser ? '' : 'message-appear'
+      }`}>
         <div
           className={isUser
             ? 'max-w-[85%] select-text rounded-2xl rounded-br-md bg-slate-800 px-4 py-3 text-slate-100'
