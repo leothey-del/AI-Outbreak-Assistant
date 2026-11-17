@@ -3,8 +3,6 @@ import { DiseaseMap } from './components/DiseaseMap';
 import { ChatInterface } from './components/ChatInterface';
 import { type MapIncident } from './data/mapLocation';
 
-
-
 // 🛠️ Open src/App.tsx and look at the main wrapper div at the top:
 
 function App() {
