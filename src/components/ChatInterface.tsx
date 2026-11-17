@@ -123,7 +123,7 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
                   type="button"
                   onPointerDown={(event) => event.preventDefault()}
                   onClick={() => handleSuggestionClick(question)}
-                  className="max-w-full rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-center text-xs text-indigo-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="max-w-full rounded-full border border-slate-700/80 bg-transparent px-3 py-1.5 text-center text-xs text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
                   {question}
                 </button>
@@ -178,7 +178,7 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
       </main>
 
       {/* Clean Dashboard Input Container */}
-      <div className="shrink-0 p-4 bg-slate-950/40 backdrop-blur-md border-t border-slate-800/80">
+      <div className="shrink-0 p-4">
         {messages.length > 0 && suggestedQuestion && !isBotTyping && (
           <div className="mb-2 flex items-center justify-start gap-1">
             <svg
@@ -215,7 +215,7 @@ export const ChatInterface = ({ onFilterLocations, }: ChatInterfaceProps) => {
                   setIsSuggestionExpanded(false);
                 }}
                 hidden={!isSuggestionExpanded}
-                className="max-w-full rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-left text-xs text-indigo-200 transition-colors hover:border-indigo-400/60 hover:bg-indigo-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                className="max-w-full rounded-full border border-slate-700/80 bg-transparent px-3 py-1.5 text-left text-xs text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-800/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
               >
                 {suggestedQuestion}
               </button>
