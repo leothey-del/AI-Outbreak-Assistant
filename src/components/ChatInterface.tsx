@@ -320,18 +320,7 @@ export const ChatInterface = ({
         {isWaitingForReply && (
           <div role="status" className="flex w-full items-start gap-3 py-2">
             <span className="sr-only">Assistant is composing a response.</span>
-            <div aria-hidden="true" className="flex min-w-0 flex-1 items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-indigo-400/20 bg-indigo-500/10 text-indigo-300">
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3Z"
-                    stroke="currentColor"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-              </div>
-              <div className="min-w-0 flex-1 pt-0.5">
+            <div aria-hidden="true" className="min-w-0 flex-1 pt-0.5">
                 <div className="mb-3 flex items-center gap-2">
                   <span className="text-[11px] font-semibold tracking-wide text-slate-300">AI Assistant</span>
                   <span className="h-1 w-1 rounded-full bg-indigo-400 motion-safe:animate-pulse" />
@@ -342,7 +331,6 @@ export const ChatInterface = ({
                   <div className="skeleton-shimmer h-3 w-full rounded-full" />
                   <div className="skeleton-shimmer h-3 w-3/5 rounded-full" />
                 </div>
-              </div>
             </div>
           </div>
         )}

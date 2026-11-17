@@ -12,6 +12,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<'chat' | 'map'>('chat');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [chatSessionKey, setChatSessionKey] = useState(0);
+  const hasMapResults = pinsToShow.length > 0;
 
   /* Change h-screen to h-[100dvh] and adjust the positioning rules */
   return (
@@ -46,10 +47,16 @@ function App() {
           className={`min-w-0 flex-1 rounded-lg px-2 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors ${
             activeTab === 'chat' && !isHistoryOpen
               ? 'text-indigo-300'
+              : activeTab === 'map'
+                ? 'text-indigo-300'
               : 'text-slate-400 hover:text-slate-200'
           }`}
         >
-          AI Assistant
+          <span className={`inline-flex rounded-md px-2 py-1 ${
+            activeTab === 'map' ? 'bg-indigo-500/10 hover:bg-indigo-500/20' : ''
+          }`}>
+            AI Assistant
+          </span>
         </button>
         <button
           type="button"
@@ -57,12 +64,14 @@ function App() {
             setActiveTab('map');
             setIsHistoryOpen(false);
           }}
-          aria-label="Live Tracker"
-          title="Live Tracker"
+          aria-label={hasMapResults ? 'Live Tracker has results' : 'Live Tracker'}
+          title={hasMapResults ? 'Map results available' : 'Live Tracker'}
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
-            activeTab === 'map'
-              ? 'bg-indigo-500/10 text-indigo-300'
-              : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+            hasMapResults
+              ? 'bg-indigo-500/20 text-indigo-300 shadow-[0_0_14px_rgba(99,102,241,0.65)] ring-1 ring-indigo-400/50'
+              : activeTab === 'map'
+                ? 'bg-indigo-500/10 text-indigo-300'
+                : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
           }`}
         >
           <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none">
